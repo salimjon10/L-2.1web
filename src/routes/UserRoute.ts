@@ -7,15 +7,16 @@ import {
   registerTeacher,
   login,
 } from "../controllers/UserController";
-import { authenticateToken } from "../services/authenticateMiddleware";
+import { authenticateToken } from "../middlewares/authenticateMiddleware";
 
 const router = express.Router();
 
-router.get("/", getUsers);
-router.delete("/", authenticateToken, deleteUser);
-router.get("/info", authenticateToken, getUserInfo);
 router.post("/login", login);
 router.post("/register/student", registerStudent);
 router.post("/register/teacher", registerTeacher);
+
+router.get("/", authenticateToken, getUsers);
+router.delete("/", authenticateToken, deleteUser);
+router.get("/info", authenticateToken, getUserInfo);
 
 export default router;

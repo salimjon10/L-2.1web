@@ -1,140 +1,131 @@
-import { Request, Response } from "express";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { Request, Response, NextFunction } from "express";
 import Users from "../models/Users";
 import bcrypt from "bcrypt";
-import { generateToken } from "../services/generateToken";
+import { generateToken } from "../utils/generateToken";
 
-export const getUsers = async (req: Request, res: Response) => {
+
+const registerUser = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+  role: string
+) => {
+  try {
+    const { name, lastname, mail, password } = req.body;
+
+    const existingUser = await Users.findOne({ mail });
+    if (existingUser) {
+      return res.status(400).json({ message: "Пользователь с таким email уже зарегистрирован", token: "" });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const newUser = new Users({
+      name,
+      lastname,
+      mail,
+      password: hashedPassword,
+      role: role,
+    });
+
+    const token = generateToken(newUser._id);
+
+    res.status(201).json({ message: "Регистрация успешна", token: token });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getUsers = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const userList = await Users.find();
     res.json(userList);
   } catch (error) {
-    console.error(error);
-    res
-      .status(500)
-      .json({ message: "Ошибка при получении списка пользователй" });
+    next(error)
   }
 };
 
-export const getUserInfo = async (req: Request, res: Response) => {
+export const getUserInfo = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { id } = req.body;
+    const userId = (req as any).user.id;
 
-    const user = await Users.findById(id);
+    const user = await Users.findById(userId);
 
     if (!user) {
       res.status(404).json({ message: "Пользователь не найден" });
       return;
     }
 
-    res.json({ name: user.name, lastname: user.lastname, email: user.mail });
+    const userInfo = {
+      name: user.name,
+      lastname: user.lastname,
+      email: user.mail,
+    };
+    
+    res.json(userInfo);
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Ошибка при получении пользователя" });
+    next(error);
   }
 };
 
-export const deleteUser = async (req: Request, res: Response) => {
+export const deleteUser = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { id } = req.body;
+    const userId = (req as any).user.id;
 
-    const user = await Users.findById(id);
+    const user = await Users.findById(userId);
     if (!user) {
       res.status(404).json({ message: "Пользователь не найден" });
       return;
     }
 
-    await Users.findByIdAndDelete(id);
+    await Users.findByIdAndDelete(userId);
     res.status(200).json({ message: "Пользователь успешно удален" });
   } catch (error) {
-    res.status(500).json({ message: error });
+    next(error)
   }
 };
 
-export const registerStudent = async (req: Request, res: Response) => {
-  try {
-    const { name, lastname, mail, password } = req.body;
-
-    const existingUser = await Users.findOne({ mail });
-    if (existingUser) {
-      res.status(400).json({ message: "Пользователь уже зарегистрирован" });
-      return;
-    }
-
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const newStudent = new Users({
-      name,
-      lastname,
-      mail,
-      password: hashedPassword,
-      role: "student",
-    });
-    await newStudent.save();
-
-    const token = generateToken(newStudent._id);
-
-    res.status(201).json({
-      message: "Регистрация успешна",
-      token: token,
-    });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Ошибка при регистрации" });
-  }
+export const registerStudent = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  await registerUser(req, res, next, "student");
 };
 
-export const registerTeacher = async (req: Request, res: Response) => {
-  try {
-    const { name, lastname, mail, password } = req.body;
-
-    const existingUser = await Users.findOne({ mail });
-    if (existingUser) {
-      res.status(400).json({ message: "Пользователь уже зарегистрирован" });
-      return;
-    }
-
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const newStudent = new Users({
-      name,
-      lastname,
-      mail,
-      password: hashedPassword,
-      role: "teacher",
-    });
-    await newStudent.save();
-
-    const token = generateToken(newStudent._id);
-
-    res.status(201).json({
-      message: "Регистрация успешна",
-      token: token,
-    });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Ошибка при регистрации" });
-  }
+export const registerTeacher = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  await registerUser(req, res, next, "teacher");
 };
 
-export const login = async (req: Request, res: Response) => {
+export const login = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   try {
     const { mail, password } = req.body;
+
     const user = await Users.findOne({ mail });
 
     if (!user) {
-      res.status(400).json({ message: "Неверный email или пароль" });
-      return;
+      res.status(400).json({ message: "Неверный email или пароль", token: "" });
+      return
     }
 
     const passwordMatch = await bcrypt.compare(password, user.password);
 
     if (!passwordMatch) {
-      res.status(400).json({ message: "Неверный email или пароль" });
-      return;
+      res.status(400).json({ message: "Неверный email или пароль", token: "" });
+      return
     }
 
     const token = generateToken(user._id);
-
-    res.status(200).json({ token });
+    res.status(200).json({ message: "Успешный вход", token: token });
   } catch (error) {
-    res.status(400).json({ error });
+    next(error);
   }
 };
