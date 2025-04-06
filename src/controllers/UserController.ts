@@ -16,7 +16,8 @@ const registerUser = async (
 
     const existingUser = await Users.findOne({ mail });
     if (existingUser) {
-      return res.status(400).json({ message: "Пользователь с таким email уже зарегистрирован", token: "" });
+      res.status(400).json({ message: "Пользователь с таким email уже зарегистрирован", token: "" });
+      return
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
