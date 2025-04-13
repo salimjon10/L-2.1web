@@ -39,7 +39,7 @@ const userSchema: Schema = new Schema<IUser, UserModel, IUserMethods>({
   },
 });
 
-const Users = model<IUser, UserModel>("Users", userSchema);
+const Users = model<IUser, UserModel>("users", userSchema);
 
 export default Users;
 export { IUser };

@@ -9,14 +9,14 @@ import {
 } from "../controllers/UserController";
 import { authenticateToken } from "../middlewares/authenticateMiddleware";
 
-const router = express.Router();
+const userRoute = express.Router();
 
-router.post("/login", login);
-router.post("/register/student", registerStudent);
-router.post("/register/teacher", registerTeacher);
+userRoute.post("/login", login);
+userRoute.post("/register/student", registerStudent);
+userRoute.post("/register/teacher", registerTeacher);
 
-router.get("/", authenticateToken, getUsers);
-router.delete("/", authenticateToken, deleteUser);
-router.get("/info", authenticateToken, getUserInfo);
+userRoute.get("/", authenticateToken, getUsers);
+userRoute.delete("/", authenticateToken, deleteUser);
+userRoute.get("/info", authenticateToken, getUserInfo);
 
-export default router;
+export default userRoute;
