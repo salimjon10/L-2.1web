@@ -82,6 +82,7 @@ export const saveImage = async (
       .toFile(newFilePath);
 
     req.body.image = newFilePath;
+    fs.unlinkSync(filePath)
     next();
   } catch (error) {
     fs.unlinkSync(filePath);
