@@ -60,7 +60,7 @@ export const getUserInfo = async (
   try {
     const userId = (req as any).user.id;
 
-    const user = await Users.findById(userId);
+    const user = await Users.findById(userId).populate("favorites");
 
     if (!user) {
       res.status(404).json({ message: "Пользователь не найден" });
