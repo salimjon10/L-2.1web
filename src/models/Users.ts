@@ -4,9 +4,10 @@ interface IUser {
   _id: string;
   name: string;
   lastname: string;
-  mail: string;
+  email: string;
   password: string;
   role: string;
+  favorites: Schema.Types.ObjectId[];
 }
 
 interface IUserMethods {
@@ -24,7 +25,7 @@ const userSchema: Schema = new Schema<IUser, UserModel, IUserMethods>({
     type: String,
     required: true,
   },
-  mail: {
+  email: {
     type: String,
     required: true,
     unique: true,
@@ -37,6 +38,13 @@ const userSchema: Schema = new Schema<IUser, UserModel, IUserMethods>({
     type: String,
     required: true,
   },
+  favorites: [
+    {
+      type: Schema.Types.ObjectId,
+      ref: "courses",
+      default: [],
+    },
+  ],
 });
 
 const Users = model<IUser, UserModel>("users", userSchema);

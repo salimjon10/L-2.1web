@@ -6,6 +6,7 @@ import {
   registerStudent,
   registerTeacher,
   login,
+  updateUser
 } from "../controllers/UserController";
 import { authenticateToken } from "../middlewares/authenticateMiddleware";
 
@@ -18,5 +19,6 @@ userRoute.post("/register/teacher", registerTeacher);
 userRoute.get("/", authenticateToken, getUsers);
 userRoute.delete("/", authenticateToken, deleteUser);
 userRoute.get("/info", authenticateToken, getUserInfo);
+userRoute.put("", authenticateToken, updateUser)
 
 export default userRoute;

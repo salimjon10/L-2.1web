@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import Course, { ICourse } from "../models/Courses";
 import { FilterQuery } from "mongoose";
 import slugify from "slugify";
+import Tags from "../models/Tags";
 
 export const createCourse = async (
   req: Request,
@@ -18,7 +19,14 @@ export const createCourse = async (
       level,
       published,
       author,
+      tags,
     } = req.body;
+
+    const findedTags = await Tags.find({ _id: { $in: tags } });
+    if (findedTags.length != tags.length) {
+      res.status(402).json({ message: "Теги не найдены" });
+      return;
+    }
 
     const newCourse = new Course({
       title,
@@ -30,6 +38,7 @@ export const createCourse = async (
       level,
       published,
       author,
+      tags,
     });
     await newCourse.save();
 
@@ -66,7 +75,8 @@ export const getCourses = async (
     const courseList = await Course.find(filter)
       .sort(sort)
       .skip(skip)
-      .limit(limit);
+      .limit(limit)
+      .populate("tags");
 
     res.status(201).json({ message: "Список курсов получен.", courseList });
   } catch (error) {
@@ -84,7 +94,7 @@ export const getCourseById = async (
     if (!id) {
       res.status(403).json({ message: "Не указан id курса." });
     }
-    const course = await Course.findById(id);
+    const course = await Course.findById(id).populate("tags");
 
     if (!course) {
       res.status(404).json({ message: "Курс не найден." });
@@ -123,7 +133,14 @@ export const updateCourse = async (
       level,
       published,
       author,
+      tags,
     } = req.body;
+
+    const findedTags = await Tags.find({ _id: { $in: tags } });
+    if (findedTags.length != tags.length) {
+      res.status(402).json({ message: "Теги не найдены" });
+      return;
+    }
 
     const newCourse = await Course.findByIdAndUpdate(id, {
       title,
@@ -135,6 +152,7 @@ export const updateCourse = async (
       level,
       published,
       author,
+      tags,
     });
 
     res.status(201).json({

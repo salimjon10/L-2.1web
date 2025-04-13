@@ -11,16 +11,14 @@ const registerUser = async (
   role: string
 ) => {
   try {
-    const { name, lastname, mail, password } = req.body;
+    const { name, lastname, email, password } = req.body;
 
-    const existingUser = await Users.findOne({ mail });
+    const existingUser = await Users.findOne({ email });
     if (existingUser) {
-      res
-        .status(400)
-        .json({
-          message: "Пользователь с таким email уже зарегистрирован",
-          token: "",
-        });
+      res.status(400).json({
+        message: "Пользователь с таким email уже зарегистрирован",
+        token: "",
+      });
       return;
     }
 
@@ -28,7 +26,7 @@ const registerUser = async (
     const newUser = new Users({
       name,
       lastname,
-      mail,
+      email,
       password: hashedPassword,
       role: role,
     });
@@ -72,7 +70,7 @@ export const getUserInfo = async (
     const userInfo = {
       name: user.name,
       lastname: user.lastname,
-      email: user.mail,
+      email: user.email,
     };
 
     res.json(userInfo);
@@ -124,9 +122,9 @@ export const login = async (
   next: NextFunction
 ) => {
   try {
-    const { mail, password } = req.body;
+    const { email, password } = req.body;
 
-    const user = await Users.findOne({ mail });
+    const user = await Users.findOne({ email });
 
     if (!user) {
       res.status(400).json({ message: "Неверный email или пароль", token: "" });
@@ -142,6 +140,43 @@ export const login = async (
 
     const token = generateToken(user._id);
     res.status(200).json({ message: "Успешный вход", token: token });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const updateUser = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { name, lastname, email, password, favorites } = req.body;
+
+    const userId = (req as any).user.id;
+
+    const user = await Users.findById(userId);
+
+    if (!user) {
+      res.status(404).json({
+        message: "Пользователь не найден",
+        token: "",
+      });
+      return;
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    await Users.findByIdAndUpdate(userId, {
+      name,
+      lastname,
+      email,
+      password: hashedPassword,
+      role: user.role,
+      favorites: favorites,
+    });
+
+    res.status(200).json({ message: "Пользователь обновлен" });
   } catch (error) {
     next(error);
   }

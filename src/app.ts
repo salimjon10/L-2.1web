@@ -1,6 +1,7 @@
 import express, { Request, Response } from "express";
 import userRouter from "./routes/UserRoute";
 import courseRoute from "./routes/CourseRoute";
+import tagsRoute from "./routes/TagsRoute";
 import { errorHandler } from "./middlewares/errorMiddleware";
 import cors from "cors";
 
@@ -15,6 +16,7 @@ app.get("/", (req: Request, res: Response) => {
 
 app.use("/api/users", userRouter);
 app.use("/api/courses", courseRoute);
+app.use("/api/tags", tagsRoute)
 app.use(errorHandler);
 
 export default app;

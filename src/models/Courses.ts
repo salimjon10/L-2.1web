@@ -12,6 +12,7 @@ interface ICourse {
   published: boolean;
   author: string;
   createdAt: number;
+  tags: Schema.Types.ObjectId[];
 }
 
 const courseSchema: Schema = new Schema<ICourse>({
@@ -58,6 +59,12 @@ const courseSchema: Schema = new Schema<ICourse>({
     required: true,
     default: Date.now,
   },
+  tags: [
+    {
+      type: Schema.Types.ObjectId,
+      ref: "tags",
+    },
+  ],
 });
 
 const Course = model<ICourse>("courses", courseSchema);
