@@ -4,6 +4,7 @@ import courseRoute from "./routes/CourseRoute";
 import tagsRoute from "./routes/TagsRoute";
 import lessonRoute from "./routes/LessonRoute";
 import commentRoute from "./routes/CommentRoute";
+import enrollmentRoute from "./routes/EnrollmentRoute";
 import { errorHandler } from "./middlewares/errorMiddleware";
 import cors from "cors";
 
@@ -17,6 +18,7 @@ app.use("/api/courses", courseRoute);
 app.use("/api/tags", tagsRoute);
 app.use("/api/lessons", lessonRoute);
 app.use("/api/comments", commentRoute);
+app.use("/api/enroll", enrollmentRoute);
 app.use(errorHandler);
 
 export default app;
