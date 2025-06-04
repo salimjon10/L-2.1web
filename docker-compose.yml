@@ -1,0 +1,33 @@
+services:
+    rabbitmq:
+        image: rabbitmq:3.9-management
+        ports:
+            - '5672:5672'
+            - '15672:15672'
+        networks:
+            - app-network
+
+    gateway:
+        build: ./gateway
+        ports:
+            - '3000:3000'
+        networks:
+            - app-network
+
+    user-service:
+        build: ./user-service
+        ports:
+            - '3001:3001'
+        networks:
+            - app-network
+
+    status-service:
+        build: ./status-service
+        ports:
+            - '3002:3002'
+        networks:
+            - app-network
+
+networks:
+    app-network:
+        driver: bridge
