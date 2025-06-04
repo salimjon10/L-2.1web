@@ -18,9 +18,9 @@ userRoute.post("/register/student", registerStudent);
 userRoute.post("/register/teacher", registerTeacher);
 
 userRoute.get("/", authenticateToken, getUsers);
-userRoute.get("/:id", getUserById);
 userRoute.delete("/", authenticateToken, deleteUser);
 userRoute.get("/info", authenticateToken, getUserInfo);
+userRoute.get("/:id", getUserById);
 userRoute.put("", authenticateToken, updateUser)
 
 export default userRoute;
