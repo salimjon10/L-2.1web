@@ -28,6 +28,41 @@ services:
         networks:
             - app-network
 
+    course-service:
+        build: ./course-service
+        ports:
+            - '3003:3003'
+        networks:
+            - app-network
+
+    tags-service:
+        build: ./tags-service
+        ports:
+            - '3004:3004'
+        networks:
+            - app-network
+
+    lesson-service:
+        build: ./lesson-service
+        ports:
+            - '3005:3005'
+        networks:
+            - app-network
+
+    comments-service:
+        build: ./comments-service
+        ports:
+            - '3006:3006'
+        networks:
+            - app-network
+
+    enrollment-service:
+        build: ./enrollment-service
+        ports:
+            - '3007:3007'
+        networks:
+            - app-network
+            
 networks:
     app-network:
         driver: bridge

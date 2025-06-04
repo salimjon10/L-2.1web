@@ -3,17 +3,18 @@ import mongoose from 'mongoose';
 import amqp, { Channel, ConsumeMessage } from 'amqplib';
 import axios from 'axios';
 import config from './utils/config';
-import userRouter from './routes/UserRoute';
+import enrollmentRoute from './routes/EnrollmentRoute';
 import { errorHandler } from './middlewares/errorMiddleware';
 import { setStatusQueue } from './utils/setStatusQueue';
+import { authenticateToken } from './middlewares/authenticateMiddleware';
 
-const { port, userServiceUrl, queue: userQueue, mongoURL: dbUrl, rabbitMQUrl } = config;
+const { port, enrollemntServiceUrl: enrollmentUrl, queue: enrollmentQueue, mongoURL: dbUrl, rabbitMQUrl } = config;
 
 const app = express();
 
 app.use(express.json());
 
-app.use(`/api`, userRouter);
+app.use(`/api`, authenticateToken, enrollmentRoute);
 app.use(errorHandler);
 
 async function processMessage(channel: Channel, msg: ConsumeMessage | null) {
@@ -23,7 +24,7 @@ async function processMessage(channel: Channel, msg: ConsumeMessage | null) {
         const message = JSON.parse(msg.content.toString());
         const { requestId, path, method, body, query, headers } = message;
 
-        const url = `${userServiceUrl}:${port}/api/${path}`;
+        const url = `${enrollmentUrl}:${port}/api/${path}`;
 
         const axiosConfig = {
             method: method,
@@ -56,11 +57,11 @@ async function connectRabbitMQ() {
             const connection = await amqp.connect(rabbitMQUrl);
             const channel = await connection.createChannel();
 
-            await channel.assertQueue(userQueue, { durable: false });
+            await channel.assertQueue(enrollmentQueue, { durable: false });
 
-            console.log('[*] Ожидает сообщения из очереди:', userQueue);
+            console.log('[*] Ожидает сообщения из очереди:', enrollmentQueue);
 
-            channel.consume(userQueue, (msg) => processMessage(channel, msg), { noAck: false });
+            channel.consume(enrollmentQueue, (msg) => processMessage(channel, msg), { noAck: false });
 
             console.log('Подключено к RabbitMQ');
             return;
@@ -83,7 +84,7 @@ const connectDB = async (retryCount = 0) => {
         console.log('Подключено к MongoDB');
         connectRabbitMQ().then(() => {
             app.listen(port, () => {
-                console.log(`[x] User Service Прослушивает порт: ${port}`);
+                console.log(`[x] Enrollment Service запущен на порту: ${port}`);
             });
         });
     } catch (error) {

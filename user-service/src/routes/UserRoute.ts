@@ -1,6 +1,7 @@
 import express from "express";
 import {
   getUsers,
+  getUserById,
   deleteUser,
   getUserInfo,
   registerStudent,
@@ -17,6 +18,7 @@ userRoute.post("/register/student", registerStudent);
 userRoute.post("/register/teacher", registerTeacher);
 
 userRoute.get("/", authenticateToken, getUsers);
+userRoute.get("/:id", getUserById);
 userRoute.delete("/", authenticateToken, deleteUser);
 userRoute.get("/info", authenticateToken, getUserInfo);
 userRoute.put("", authenticateToken, updateUser)

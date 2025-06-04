@@ -52,6 +52,20 @@ export const getUsers = async (
   }
 };
 
+export const getUserById = async (req: Request, res: Response, next: NextFunction) => {
+	try {
+		const { id } = req.params
+		const user = await Users.findById(id);
+		if(!user){
+			res.status(404).json({message: "Пользователь не найден"});
+			return
+		}
+		res.status(200).json(user);
+	} catch (error) {
+		next({ error, message: 'Ошибка при получении списка пользователей' });
+	}
+};
+
 export const getUserInfo = async (
   req: Request,
   res: Response,
